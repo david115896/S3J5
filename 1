@@ -1,0 +1,50 @@
+require 'bundler'
+Bundler.require
+$:.unshift File.expand_path('./../lib', __FILE__)
+
+require 'app/controller'
+
+
+class Gossip
+
+	attr_accessor :author, :content
+	def initialize(params)
+		@author = params[:author]
+		@content = params[:content]
+	end
+
+	def save
+		if File.exist?('db/gossip.csv') == false
+			CSV.open('db/gossip.csv', 'a') do |csv|
+                        csv << ["Authors", "Contents"]  
+	  		end
+		end
+		CSV.open('db/gossip.csv', 'a') do |csv|
+        		csv << [@author, @content]
+      		end
+  	end
+
+	def self.all
+		all_gossips = Array.new
+		if File.exist?('db/gossip.csv') == true
+
+		file = CSV.read('db/gossip.csv')
+				#, headers: true, header_converters: :symbol, converters: :all)
+		file.each do |row|
+			params = {author: row[:authors], content: row[:contents]}
+			all_gossips <<  Gossip.new(params)			
+		end
+		
+		else
+		
+			puts "le fichier n'existe pas! Commence par ecrire un potin"
+		end	
+
+		return all_gossips
+
+
+		#headers: true # Removes headers from read
+		#header_converters: :symbol # Allows each header to be accessed by their respective symbol
+		#converters: :all # Converts each datatype to the correct ruby datatype ex: string representations of integers get converted into intege
+	end
+end
